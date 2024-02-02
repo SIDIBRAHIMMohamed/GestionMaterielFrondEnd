@@ -1,0 +1,14 @@
+{
+    "materials": [
+        { "idMateriel": 1, "nom": "Materiel 1", "version": "1.0", "ref": "Reference 1", "status": 1 },
+        { "idMateriel": 2, "nom": "Materiel 2", "version": "2.0", "ref": "Reference 2", "status": 2 },
+        { "idMateriel": 3, "nom": "Materiel 3", "version": "3.0", "ref": "Reference 3", "status": 3 },
+        { "idMateriel": 4, "nom": "Materiel 4", "version": "4.0", "ref": "Reference 4", "status": 4 },
+        { "idMateriel": 5, "nom": "Materiel 5", "version": "5.0", "ref": "Reference 5", "status": 5 },
+        { "idMateriel": 6, "nom": "Materiel 6", "version": "6.0", "ref": "Reference 6", "status": 6 },
+        { "idMateriel": 7, "nom": "Materiel 7", "version": "7.0", "ref": "Reference 7", "status": 7 },
+        { "idMateriel": 8, "nom": "Materiel 8", "version": "8.0", "ref": "Reference 8", "status": 8 },
+        { "idMateriel": 9, "nom": "Materiel 9", "version": "9.0", "ref": "Reference 9", "status": 9 },
+        { "idMateriel": 10, "nom": "Materiel 10", "version": "10.0", "ref": "Reference 10", "status": 10 }
+    ]
+}
