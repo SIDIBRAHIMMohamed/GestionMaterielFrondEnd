@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 // import { Materiel } from '../models/Materiel'
-import materials from '../assets/materials.json'
+import materials from '../assets/materials.json';
 
 const items = ref(materials['materials']);
 
