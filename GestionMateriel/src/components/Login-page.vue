@@ -48,7 +48,7 @@ export default {
             this.$router.push('/admin');
           } else {
             // Rediriger l'utilisateur vers une autre page selon son rôle
-            this.$router.push('/user');
+            this.$router.push('/users');
           }
         })
         .catch(error => {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/utilisateurs';
-const API_URL2 = 'http://localhost:8080/api';
+const API_URL = 'http://localhost:9090/api/utilisateurs';
+const API_URL2 = 'http://localhost:9090/api';
 
 export default {
   getAllUsers() {

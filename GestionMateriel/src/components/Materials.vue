@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-// import { Materiel } from '../models/Materiel'
-import materials from '../assets/materials.json';
+import ApiService from '../services/ApiService';
 
-const items = ref(materials['materials']);
+const items = ref<any[]>([]); // Define items here
+
+ApiService.getRessource('/materiels').then((response:any) => {
+  console.log(response.data);
+  items.value = response.data; // Update items here
+});
 
 const updateItem = (item: any) => {
   console.log('Update:', item);
