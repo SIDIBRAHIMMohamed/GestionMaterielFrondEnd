@@ -15,10 +15,18 @@ export default {
     putRessource(url:any, data:any) {
         return axios.put(API_URL + url, data);
     },
+
     deleteRessource(url:any) {
         return axios.delete(API_URL + url);
     },
 
+  makereservation(url:any , params:any) {
+    return axios.post(API_URL + url,null, {params : params });
+  },
+
+  putStatus(url:any , params:any) {
+    return axios.put(API_URL + url,null, {params : params });
+  },
 
   
   

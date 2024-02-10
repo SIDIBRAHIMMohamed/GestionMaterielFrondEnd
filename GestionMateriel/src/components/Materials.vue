@@ -12,6 +12,7 @@ app.use(VueSweetalert2);
 
 const items = ref<any[]>([]);
   const role = localStorage.getItem('userRole');
+  const userId = localStorage.getItem('UserId') as string;
   const next = ref(false);
 
 const currentPage = ref(1);
@@ -81,9 +82,93 @@ const deleteItem = async (item: any) => {
   }
 }
 
-const borrowItem = (item: any) => {
+const borrowItem = async (item: any) => {
   console.log('Borrow:', item);
+  console.log('user is here');
   // Implement your borrow logic here
+  if(item != null) {
+    ApiService.getRessource('/get/'+item.idMateriel).then(async response => {
+      const responseData =response.data;
+
+      const status = responseData.status;
+      const materielid = responseData.idMateriel;
+      console.log(responseData);
+      
+      
+      if(status == 0) {
+
+  const { value: startdate } = await Swal.fire({
+  title: "Choisir votre debut d'emprunt",
+  input: "date",
+  didOpen: () => {
+    const today = (new Date()).toISOString();
+    const inputElement = Swal.getInput();
+if (inputElement) {
+  inputElement.min = today.split("T")[0];
+} else {
+  Swal.fire("veuillez choisir une date");
+}
+  }
+});
+if (startdate) {
+  const { value: enddate } = await Swal.fire({
+  title: "Choisir votre date de fin d'emprunt",
+  input: "date",
+  didOpen: () => {
+    const today = (new Date()).toISOString();
+    const inputElement = Swal.getInput();
+if (inputElement) {
+  inputElement.min = startdate.split("T")[0];
+} else {
+  Swal.fire("veuillez choisir une date");
+}
+  }
+});
+if(enddate) {
+  console.log(typeof userId);
+  console.log(typeof materielid.toString());
+
+  const params = {
+  dateDebut: startdate.toString(), 
+  dateFin: enddate.toString(),
+  idUtilisateur: parseInt(userId),
+  idMateriel: parseInt(materielid)
+};
+  Swal.fire("Vous avez emprunte du " + startdate + " jusqu'au "+ enddate);
+
+  ApiService.makereservation('/makeReservation', params).then(response => {
+
+   
+
+    const params1 = {
+     
+
+      status : 1,
+    }
+    
+    ApiService.putStatus('/updatestatus/'+item.idMateriel, params1).then(response => {
+      getMaterials();
+      console.log(response);
+    }).catch(error => {
+      console.error(error);
+    });
+  }).catch(error => {
+    console.error(error);
+  })
+  
+}
+}
+
+      }
+      
+      // I need to check the state of the material
+
+    }).catch(error => {
+      console.error(error);
+    });
+  }
+
+
 }
 
 const nextPage = () => {
@@ -156,7 +241,10 @@ const prevPage = () => {
             <td>{{ item.nom }}</td>
             <td>{{ item.version }}</td>
             <td>{{ item.ref }}</td>
-            <td v-if="role === '1'">{{ item.status }}</td>
+            <td>
+              <p v-if="item.status === 1" style="color: #C02F1D;">Emprunte</p>
+              <p v-else style="color: #107896;">Disponible</p>
+            </td>
             <td>
             <button @click="updateItem(item)" class="btn btn-primary" v-if="role === '1'">Modifier</button>
             <button @click="deleteItem(item)" class="btn btn-danger" v-if="role === '1'">Supprimer</button>
