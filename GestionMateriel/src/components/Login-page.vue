@@ -41,6 +41,7 @@ export default {
           console.log('Connexion réussie:', response.data);
           // Stockez les informations d'authentification dans le stockage local
           localStorage.setItem('userRole', parseInt(response.data.role, 10));
+          console.log("userRole", localStorage.getItem('userRole'));
 
           // Rediriger l'utilisateur en fonction de son rôle
           if (response.data.role === 1) {
