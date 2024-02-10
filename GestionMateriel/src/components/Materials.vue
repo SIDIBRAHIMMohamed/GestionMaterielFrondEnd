@@ -136,7 +136,7 @@ const prevPage = () => {
 </script>
 <template>
   <div class="ajouter">
-  <button v-on:click="addMateriel" class="btn btn-primary">Ajouter</button>
+  <button v-on:click="addMateriel" class="btn btn-primary" v-if="role === '1'">Ajouter</button>
 
 
     </div>
