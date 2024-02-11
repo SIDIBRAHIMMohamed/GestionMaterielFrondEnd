@@ -1,33 +1,53 @@
 <template>
-  <div>
-    <h2>Liste des utilisateurs</h2>
-    <ul>
-      <li v-for="user in users" :key="user.id">
-        {{ user.nom }} {{ user.prenom }}
-        <button @click="showUserDetails(user)">Détails</button>
-        <button @click="editUser(user)">Modifier</button>
-        <button @click="deleteUser(user.id)">Supprimer</button>
-      </li>
-    </ul>
+  <div class="ajouter">
+      <button @click="showAddUserDialog = true" class="btn btn-add">Ajouter un utilisateur</button>
+    </div>
+  <div class="user-page"> 
+    <div class="user-lists">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="user in users" :key="user.id">
+            <td>{{ user.nom }}</td>
+            <td>{{ user.prenom }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role === 1 ? 'Administrateur' : 'Utilisateur' }}</td>
+            <td>
+              <button @click="showUserDetails(user)" class="btn btn-details">Détails</button>
+              <button @click="editUser(user)" class="btn btn-modify">Modifier</button>
+              <button @click="deleteUser(user.id)" class="btn btn-delete">Supprimer</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <button @click="showAddUserDialog = true">Ajouter un utilisateur</button>
+    
 
     <div v-if="showAddUserDialog" class="dialog">
       <div class="dialog-content">
         <h3 v-if="editMode">Modifier un utilisateur</h3>
         <h3 v-else>Ajouter un utilisateur</h3>
-        <form @submit.prevent="editMode ? updateUser() : addUser()">
+        <form @submit.prevent="editMode ? updateUser() : addUser()" class="form">
           <div>
             <label>Nom:</label>
-            <input type="text" :value="getFieldValue('nom')" @input="updateField($event.target.value, 'nom')" required>
+            <input type="text" v-model="newUser.nom" required>
           </div>
           <div>
             <label>Prénom:</label>
-            <input type="text" :value="getFieldValue('prenom')" @input="updateField($event.target.value, 'prenom')" required>
+            <input type="text" v-model="newUser.prenom" required>
           </div>
           <div>
             <label>Email:</label>
-            <input type="email" :value="getFieldValue('email')" @input="updateField($event.target.value, 'email')" required>
+            <input type="email" v-model="newUser.email" required>
           </div>
           <div v-if="!editMode">
             <label>Mot de passe:</label>
@@ -50,15 +70,20 @@
     <div v-if="showUserDetailsDialog" class="dialog">
       <div class="dialog-content">
         <h3>Détails de l'utilisateur</h3>
-        <p>Nom: {{ userDetails.nom }}</p>
-        <p>Prénom: {{ userDetails.prenom }}</p>
-        <p>Email: {{ userDetails.email }}</p>
-        <p>Password: {{ userDetails.password }}</p>
-        <p>Role: {{ userDetails.role }}</p>
+        <p><strong>Nom:</strong> {{ userDetails.nom }}</p>
+        <p><strong>Prénom:</strong> {{ userDetails.prenom }}</p>
+        <p><strong>Email:</strong> {{ userDetails.email }}</p>
+        <p><strong>Rôle:</strong> {{ userDetails.role === 1 ? 'Administrateur' : 'Utilisateur' }}</p>
         <!-- Autres détails à afficher -->
         <button @click="closeUserDetailsDialog">Fermer</button>
       </div>
     </div>
+
+    <div class="pagination">
+  <button @click="loadPreviousPage" :disabled="currentPage === 1" class="btn btn-pagination">Page précédente</button>
+  <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+  <button @click="loadNextPage" :disabled="currentPage === totalPages" class="btn btn-pagination">Page suivante</button>
+</div>
   </div>
 </template>
 
@@ -69,6 +94,8 @@ export default {
   data() {
     return {
       users: [],
+      currentPage: 1,
+      totalPages: 0,
       showAddUserDialog: false,
       showUserDetailsDialog: false,
       newUser: {
@@ -92,14 +119,7 @@ export default {
         email: '',
         password: '',
         role: 0
-      },
-      fields: [
-        { key: 'nom', label: 'Nom' },
-        { key: 'prenom', label: 'Prénom' },
-        { key: 'email', label: 'Email' },
-        { key: 'password', label: 'Mot de passe' },
-        { key: 'role', label: 'Rôle' }
-      ]
+      }
     };
   },
   mounted() {
@@ -107,13 +127,27 @@ export default {
   },
   methods: {
     loadUsers() {
-      UserService.getAllUsers()
+      UserService.getAllUsersPagination(this.currentPage, 10)
         .then(response => {
-          this.users = response.data;
+          this.users = response.data.users;
+          this.currentPage = response.data.currentPage;
+          this.totalPages = response.data.totalPages;
         })
         .catch(error => {
           console.error('Error fetching users:', error);
         });
+    },
+    loadPreviousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.loadUsers();
+      }
+    },
+    loadNextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.loadUsers();
+      }
     },
     addUser() {
       UserService.createUser(this.newUser)
@@ -126,13 +160,7 @@ export default {
         });
     },
     showUserDetails(user) {
-      this.userDetails = {
-        nom: user.nom,
-        prenom: user.prenom,
-        email: user.email,
-        password: user.password,
-        role: user.role
-      };
+      this.userDetails = { ...user };
       this.showUserDetailsDialog = true;
     },
     editUser(user) {
@@ -186,36 +214,22 @@ export default {
         role: 0
       };
       this.showUserDetailsDialog = false;
-    },
-    getFieldValue(fieldName) {
-      return this.editMode ? this.editedUser[fieldName] : this.newUser[fieldName];
-    },
-    updateField(value, fieldName) {
-      if (this.editMode) {
-        this.editedUser[fieldName] = value;
-      } else {
-        this.newUser[fieldName] = value;
-      }
     }
   }
 };
 </script>
 
+
 <style scoped>
-/* Styles pour la liste des utilisateurs */
-ul {
-  list-style-type: none;
-  padding: 0;
+.pagination {
+  display: flex;
+  justify-content: flex-end; /* Align items to the right */
+  margin-top: 20px;
 }
 
-li {
-  margin-bottom: 10px;
-}
-
-/* Styles pour les boutons */
-button {
+.pagination button {
   padding: 5px 10px;
-  background-color: #007bff;
+  background-color: #007bff; /* Bleu */
   color: #fff;
   border: none;
   border-radius: 3px;
@@ -223,11 +237,66 @@ button {
   margin-left: 5px;
 }
 
-button:hover {
-  background-color: #0056b3;
+.pagination button:last-child {
+  background-color: #28a745; /* Vert */
 }
 
-/* Styles pour le formulaire d'ajout/modification d'utilisateur */
+.pagination button:hover {
+  opacity: 0.8;
+}
+
+.pagination span {
+  margin: 0 10px;
+}
+.user-lists {
+  margin-top: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 8px;
+  text-align: left;
+}
+
+.table th {
+  background-color: #f2f2f2;
+}
+
+/* Styles pour les boutons */
+.btn {
+  padding: 5px 10px;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.btn-details {
+  background-color: #28a745; /* Vert */
+}
+
+.btn-modify {
+  background-color: #007bff; /* Bleu */
+}
+
+.btn-delete {
+  background-color: #dc3545; /* Rouge */
+}
+
+.btn-add {
+  background-color: #17a2b8; /* Autre bleu */
+}
+
+.btn:hover {
+  opacity: 0.8;
+}
+
+/* Styles pour le formulaire d'ajout/modification/détails */
 .dialog {
   position: fixed;
   top: 0;
@@ -251,18 +320,85 @@ button:hover {
   margin-bottom: 10px;
 }
 
-.dialog-content div {
-  margin-bottom: 10px;
+.form {
+  display: flex;
+  flex-direction: column;
 }
 
-.dialog-content input {
-  width: 100%;
+.form label {
+  margin-bottom: 5px;
+}
+
+.form input {
   padding: 8px;
   border-radius: 3px;
   border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.form select {
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.dialog-content p {
+  margin-bottom: 5px;
+  font-size: 16px;
+}
+
+.dialog-content strong {
+  font-weight: bold;
+  margin-right: 5px;
 }
 
 .dialog-content button {
   margin-top: 10px;
+  background-color: #007bff; /* Bleu */
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.dialog-content button:hover {
+  background-color: #0056b3; /* Bleu plus foncé au survol */
+}
+
+/* Styles pour la pagination */
+.pagination {
+  display: flex;
+  justify-content: flex-end; /* Align items to the left */
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 5px 10px;
+  background-color: #007bff; /* Bleu */
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  opacity: 0.8;
+}
+
+.pagination span {
+  margin: 0 10px;
+}
+.add-user-button-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999; /* Assure que le bouton reste au-dessus du reste du contenu */
+}
+.ajouter {
+  display: flex;
+  justify-content: flex-end; /* Align items to the left */
+  margin-top: 20px;
 }
 </style>

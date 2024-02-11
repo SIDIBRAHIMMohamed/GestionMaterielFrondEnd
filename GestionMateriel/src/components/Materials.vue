@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref , createApp } from 'vue';
-import ApiService from '../services/ApiService';
-import VueSweetalert2 from 'vue-sweetalert2';
-import 'sweetalert2/dist/sweetalert2.min.css';
 import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+import { createApp, ref } from 'vue';
+import VueSweetalert2 from 'vue-sweetalert2';
+import ApiService from '../services/ApiService';
 
 const app = createApp({});
 app.use(VueSweetalert2);
