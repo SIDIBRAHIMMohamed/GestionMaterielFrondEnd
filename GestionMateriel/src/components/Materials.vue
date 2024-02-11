@@ -228,12 +228,12 @@ const prevPage = () => {
             <td>{{ item.version }}</td>
             <td>{{ item.ref }}</td>
             <td>
-              <p v-if="item.status === 1" style="color: #C02F1D;">Emprunte</p>
+              <p v-if="item.status === 1" style="color: #C02F1D;">Emprunté</p>
               <p v-else style="color: #107896;">Disponible</p>
             </td>
             <td>
             <button @click="updateItem(item)" class="btn btn-primary" v-if="role === '1'">Modifier</button>
-            <button @click="deleteItem(item)" class="btn btn-danger" v-if="role === '1'">Supprimer</button>
+            <button @click="deleteItem(item)" class="btn btn-danger"  v-if="role === '1' " :disabled="item.status">Supprimer</button>
             <button @click="borrowItem(item)" class="btn btn-success" :disabled="item.status">Emprunter</button>
           </td>
           </tr>
@@ -288,6 +288,10 @@ const prevPage = () => {
 .btn-primary {
   background-color: #007bff; /* Blue */
   color: white;
+}
+
+.table td button {
+  margin-right: 5px;
 }
 
 .btn-success {
