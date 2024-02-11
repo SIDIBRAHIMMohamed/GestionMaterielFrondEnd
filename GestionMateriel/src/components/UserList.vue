@@ -1,7 +1,7 @@
 <template>
   <div class="ajouter">
-      <button @click="showAddUserDialog = true" class="btn btn-add">Ajouter un utilisateur</button>
-    </div>
+    <button @click="showAddUserDialog = true" class="btn btn-add">Ajouter un utilisateur</button>
+  </div>
   <div class="user-page"> 
     <div class="user-lists">
       <table class="table">
@@ -30,42 +30,49 @@
       </table>
     </div>
 
-    
-
     <div v-if="showAddUserDialog" class="dialog">
-      <div class="dialog-content">
+    <div class="dialog-content">
         <h3 v-if="editMode">Modifier un utilisateur</h3>
         <h3 v-else>Ajouter un utilisateur</h3>
         <form @submit.prevent="editMode ? updateUser() : addUser()" class="form">
-          <div>
-            <label>Nom:</label>
-            <input type="text" v-model="newUser.nom" required>
-          </div>
-          <div>
-            <label>Prénom:</label>
-            <input type="text" v-model="newUser.prenom" required>
-          </div>
-          <div>
-            <label>Email:</label>
-            <input type="email" v-model="newUser.email" required>
-          </div>
-          <div v-if="!editMode">
-            <label>Mot de passe:</label>
-            <input type="password" v-model="newUser.password" required>
-          </div>
-          <div>
-            <label>Rôle:</label>
-            <select v-model="newUser.role" required>
-              <option value="0">Utilisateur</option>
-              <option value="1">Administrateur</option>
-            </select>
-          </div>
+            <div>
+                <label>Nom:</label>
+                <input type="text" v-if="editMode" v-model="editedUser.nom" required>
+                <input type="text" v-else v-model="newUser.nom" required>
+            </div>
+            <div>
+                <label>Prénom:</label>
+                <input type="text" v-if="editMode" v-model="editedUser.prenom" required>
+                <input type="text" v-else v-model="newUser.prenom" required>
+            </div>
+            <div>
+                <label>Email:</label>
+                <input type="email" v-if="editMode" v-model="editedUser.email" required>
+                <input type="email" v-else v-model="newUser.email" required>
+            </div>
+            <div>
+                <label>Mot de passe:</label>
+                <input type="password" v-if="editMode" v-model="editedUser.password" required>
+                <input type="password" v-else v-model="newUser.password" required>
+            </div>
+            <div>
+                <label>Rôle:</label>
+                <select v-if="editMode" v-model="editedUser.role" required>
+                  <option value="0">Utilisateur</option>
+                  <option value="1">Administrateur</option>
+                </select>
+                <select v-else v-model="newUser.role" required>
+                  <option value="0">Utilisateur</option>
+                  <option value="1">Administrateur</option>
+                </select>
+            </div>
 
-          <button type="submit">{{ editMode ? 'Modifier' : 'Ajouter' }}</button>
-          <button @click="closeDialog">{{ editMode ? 'Annuler' : 'Fermer' }}</button>
+
+            <button type="submit">{{ editMode ? 'Modifier' : 'Ajouter' }}</button>
+            <button @click="closeDialog">{{ editMode ? 'Annuler' : 'Fermer' }}</button>
         </form>
-      </div>
     </div>
+</div>
 
     <div v-if="showUserDetailsDialog" class="dialog">
       <div class="dialog-content">
@@ -80,12 +87,14 @@
     </div>
 
     <div class="pagination">
-  <button @click="loadPreviousPage" :disabled="currentPage === 1" class="btn btn-pagination">Page précédente</button>
-  <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-  <button @click="loadNextPage" :disabled="currentPage === totalPages" class="btn btn-pagination">Page suivante</button>
-</div>
+      <button @click="loadPreviousPage" :disabled="currentPage === 1" class="btn btn-pagination">Page précédente</button>
+      <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+      <button @click="loadNextPage" :disabled="currentPage === totalPages" class="btn btn-pagination">Page suivante</button>
+    </div>
+    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
   </div>
 </template>
+
 
 <script>
 import UserService from '@/services/UserService';
@@ -118,7 +127,8 @@ export default {
         email: '',
         password: '',
         role: 0
-      }
+      },
+      errorMessage: '' // Ajout de la variable pour stocker le message d'erreur
     };
   },
   mounted() {
@@ -165,6 +175,7 @@ export default {
     editUser(user) {
       this.editMode = true;
       this.editedUser = { ...user };
+      this.editedUser.password = user.password;
       this.showAddUserDialog = true;
     },
     deleteUser(userId) {
@@ -184,6 +195,7 @@ export default {
         })
         .catch(error => {
           console.error('Error updating user:', error);
+          this.errorMessage = 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.';
         });
     },
     closeDialog() {
@@ -220,6 +232,11 @@ export default {
 
 
 <style scoped>
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
 .pagination {
   display: flex;
   justify-content: flex-end; /* Align items to the right */

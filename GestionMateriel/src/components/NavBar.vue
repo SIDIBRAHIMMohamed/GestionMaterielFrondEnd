@@ -27,7 +27,6 @@ import {
   FwbNavbar,
   FwbNavbarCollapse,
   FwbNavbarLink,
-  FwbNavbarLogo,
 } from 'flowbite-vue';
 
 const router = useRouter();
@@ -40,6 +39,8 @@ const logout = () => {
   localStorage.removeItem('userAuthenticated');
   router.push('/');
 };
+let isShowMenu = true; // Définition de la prop isShowMenu et initialisation à true
+
 </script>
 
 <style>
@@ -49,6 +50,7 @@ const logout = () => {
 
 .full-width-navbar {
   width: 100%;
+  color:black;
 }
 
 /* Ajout du style pour le texte du bouton actif */
