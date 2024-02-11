@@ -252,12 +252,12 @@ const prevPage = () => {
             <td>
             <button @click="updateItem(item)" class="btn btn-primary" v-if="role === '1'">Modifier</button>
             <button @click="deleteItem(item)" class="btn btn-danger" v-if="role === '1'">Supprimer</button>
-            <button @click="borrowItem(item)" class="btn btn-success">Emprunter</button>
+            <button @click="borrowItem(item)" class="btn btn-success" :disabled="item.status">Emprunter</button>
           </td>
           </tr>
         </tbody>
       </table>
-    <!-- Pagination buttons -->
+
 <div class="pagination">
   <button class="btn btn-primary" @click="prevPage">Precedant</button>
   <span>Page: {{ currentPage }}</span>
@@ -274,7 +274,8 @@ const prevPage = () => {
 }
 
 .table {
-  width: 100%;
+  width: 80%;
+  margin: 0 auto;
   border-collapse: collapse;
 }
 
