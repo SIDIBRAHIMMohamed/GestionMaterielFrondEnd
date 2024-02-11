@@ -23,7 +23,7 @@
             <td>
               <button @click="showUserDetails(user)" class="btn btn-details">Détails</button>
               <button @click="editUser(user)" class="btn btn-modify">Modifier</button>
-              <button @click="deleteUser(user.id)" class="btn btn-delete">Supprimer</button>
+              <button @click="confirmDeleteUser(user.id)" class="btn btn-delete">Supprimer</button>
             </td>
           </tr>
         </tbody>
@@ -86,6 +86,15 @@
       </div>
     </div>
 
+    <!-- Fenêtre modale de confirmation de suppression -->
+    <div v-if="showDeleteConfirmation" class="modal">
+  <div class="modal-content">
+    <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
+    <button @click="deleteUserConfirmed" class="confirm-button">Confirmer</button>
+    <button @click="showDeleteConfirmation = false" class="cancel-button">Annuler</button>
+  </div>
+</div>
+
     <div class="pagination">
       <button @click="loadPreviousPage" :disabled="currentPage === 1" class="btn btn-pagination">Page précédente</button>
       <span>Page {{ currentPage }} sur {{ totalPages }}</span>
@@ -106,6 +115,7 @@ export default {
       totalPages: 0,
       showAddUserDialog: false,
       showUserDetailsDialog: false,
+      showDeleteConfirmation: false,
       newUser: {
         nom: '',
         prenom: '',
@@ -216,6 +226,21 @@ export default {
         role: 0
       };
     },
+    confirmDeleteUser(userId) {
+      this.userIdToDelete = userId; // Sauvegarde de l'ID de l'utilisateur à supprimer
+      this.showDeleteConfirmation = true; // Affichage de la fenêtre modale de confirmation
+    },
+    deleteUserConfirmed() {
+      UserService.deleteUser(this.userIdToDelete)
+        .then(() => {
+          this.loadUsers();
+          this.showDeleteConfirmation = false; // Cacher la fenêtre modale après suppression
+        })
+        .catch(error => {
+          console.error('Error deleting user:', error);
+          this.showDeleteConfirmation = false; // Cacher la fenêtre modale en cas d'erreur
+        });
+    },
     closeUserDetailsDialog() {
       this.userDetails = {
         nom: '',
@@ -230,8 +255,52 @@ export default {
 };
 </script>
 
-
 <style scoped>
+
+.modal {
+  position: fixed;
+  top: 300px;
+  left: 350px;
+  width: 31%;
+  height: 25%;
+  background-color: rgba(0, 0, 0, 0.2); /* Opacité réduite pour la transparence */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content p {
+  margin-bottom: 10px;
+}
+
+.modal-content button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.modal-content button:last-child {
+  margin-right: 0;
+}
+
+.confirm-button {
+  background-color: #007bff; /* Bleu */
+  color: white;
+}
+
+.cancel-button {
+  background-color: #dc3545; /* Rouge */
+  color: white;
+}
+
 .error-message {
   color: red;
   margin-top: 10px;
