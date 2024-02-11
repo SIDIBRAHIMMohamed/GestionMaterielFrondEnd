@@ -43,8 +43,11 @@ export default {
           localStorage.setItem('userRole', parseInt(response.data.role, 10));
           
           localStorage.setItem('UserId', parseInt(response.data.id));
+          localStorage.setItem('Username', response.data.nom);
+          localStorage.setItem('Userprenom', response.data.prenom);
           console.log("userRole", localStorage.getItem('userRole'));
           console.log("userId", localStorage.getItem('UserId'));
+          console.log("username", localStorage.getItem('Username'));
 
           // Rediriger l'utilisateur en fonction de son rôle
           if (response.data.role === 1) {

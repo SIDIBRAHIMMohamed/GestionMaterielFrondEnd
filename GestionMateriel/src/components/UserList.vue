@@ -1,5 +1,9 @@
 <template>
+
+<Navbar :userName="nom"  :userPrenom= "prenom"   :userRole = "role" />
+
   <div>
+    
     <h2>Liste des utilisateurs</h2>
     <ul>
       <li v-for="user in users" :key="user.id">
@@ -65,7 +69,36 @@
 <script>
 import UserService from '@/services/UserService';
 
+import Navbar from './NavbarSite.vue'
+
+
+
+
+
+
+
+
+
 export default {
+  
+
+  setup(props) {
+    const nom = localStorage.getItem('Username');
+    const prenom = localStorage.getItem('Userprenom');
+    const role = localStorage.getItem('userRole');
+
+    return {
+      nom,
+      prenom,
+      role
+    };
+  },
+
+  components: {
+    Navbar
+  },
+  
+  
   data() {
     return {
       users: [],
