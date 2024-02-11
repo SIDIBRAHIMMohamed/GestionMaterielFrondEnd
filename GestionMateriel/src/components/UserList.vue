@@ -24,6 +24,7 @@
               <button @click="showUserDetails(user)" class="btn btn-details">Détails</button>
               <button @click="editUser(user)" class="btn btn-modify">Modifier</button>
               <button @click="deleteUser(user.id)" class="btn btn-delete">Supprimer</button>
+              <button @click="resetPassword(user.email)" class="btn btn-reset">Réinitialiser</button>
             </td>
           </tr>
         </tbody>
@@ -89,6 +90,7 @@
 
 <script>
 import UserService from '@/services/UserService';
+import ApiService from '@/services/ApiService';
 export default {
   data() {
     return {
@@ -186,6 +188,16 @@ export default {
           console.error('Error updating user:', error);
         });
     },
+    resetPassword(email) {
+    const reset = {
+      "email": email
+    }  
+    ApiService.postRessource('/api/reset-password', reset).then(response => {
+    }).catch(error => {
+      console.error(error);
+    });
+  },
+
     closeDialog() {
       this.editMode = false;
       this.showAddUserDialog = false;
@@ -286,6 +298,10 @@ export default {
 
 .btn-delete {
   background-color: #dc3545; /* Rouge */
+}
+
+.btn-reset {
+  background-color: #ffc107; /* Jaune */
 }
 
 .btn-add {

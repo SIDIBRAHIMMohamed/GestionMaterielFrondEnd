@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-form">
-      <h3>Login</h3>
+      <h3>Connexion</h3>
       <form @submit.prevent="login">
         <div class="form-group">
           <label>Email</label>
@@ -35,6 +35,14 @@
 
 <script>
 import UserService from '@/services/UserService';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+import { createApp, ref } from 'vue';
+import VueSweetalert2 from 'vue-sweetalert2';
+import ApiService from '../services/ApiService';
+
+const app = createApp({});
+app.use(VueSweetalert2);
 
 export default {
   data() {
@@ -47,19 +55,51 @@ export default {
   },
   methods: {
     login() {
-      this.loading = true; // Indiquer que la connexion est en cours
+      this.loading = true;
       UserService.login({ email: this.email, password: this.password })
         .then(response => {
-          console.log('Connexion réussie:', response.data);
-          localStorage.setItem('userRole', parseInt(response.data.role, 10));
-          localStorage.setItem('UserId', parseInt(response.data.id));
-          localStorage.setItem('userAuthenticated', true);
-          console.log("userRole", localStorage.getItem('userRole'));
-          console.log("userId", localStorage.getItem('UserId'));
-          if (response.data.role === 1) {
-            this.$router.push('/admin');
+          if (response.data.haslogiIn === false) {
+            Swal.fire({
+              title: 'changer le mot de passe',
+              html:
+                `<input id="swal-input1" type="password" class="swal2-input" placeholder="Nouveau mot de passe">` +
+                `<input id="swal-input2" type="password" class="swal2-input" placeholder="Confirmez le mot de passe">`,
+              focusConfirm: false,
+              showCancelButton: true,
+              preConfirm: () => {
+                return [
+                  document.getElementById('swal-input1').value,
+                  document.getElementById('swal-input2').value
+                ]
+              }
+            }).then(result => {
+              if (result.value) {
+                const newPassword = result.value[0];
+                const confirmPassword = result.value[1];
+
+                if (newPassword !== confirmPassword) {
+                  Swal.fire('Erreur', 'Les mots de passe ne correspondent pas', 'error');
+                } else {
+                  ApiService.postRessource('/api/change-password', {
+                    email: this.email,
+                    password: newPassword
+                  }).then(response => {
+                    Swal.fire('Succès', 'Mot de passe mis à jour avec succès', 'success');
+                  }).catch(error => {
+                    Swal.fire('Erreur', 'Erreur lors de la mise à jour du mot de passe', 'error');
+                  });
+                }
+              }
+            });
           } else {
-            this.$router.push('/users');
+            localStorage.setItem('userRole', parseInt(response.data.role, 10));
+            localStorage.setItem('UserId', parseInt(response.data.id));
+            localStorage.setItem('userAuthenticated', true);
+            if (response.data.role === 1) {
+              this.$router.push('/admin');
+            } else {
+              this.$router.push('/users');
+            }
           }
         })
         .catch(error => {
@@ -67,9 +107,9 @@ export default {
           if (error.response) {
             console.error('Status:', error.response.status);
             console.error('Data:', error.response.data);
-            this.errorMessage = error.response.data; // Afficher le message d'erreur provenant de la réponse
+            this.errorMessage = error.response.data; 
           } else {
-            this.errorMessage = "Email ou mot de passe incorrecte"; // Message d'erreur générique
+            this.errorMessage = "Email ou mot de passe incorrecte"; 
           }
         })
         .finally(() => {

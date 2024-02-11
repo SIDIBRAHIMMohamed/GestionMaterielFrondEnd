@@ -85,18 +85,12 @@ const deleteItem = async (item: any) => {
 }
 
 const borrowItem = async (item: any) => {
-  console.log('Borrow:', item);
-  console.log('user is here');
-  // Implement your borrow logic here
   if(item != null) {
     ApiService.getRessource('/get/'+item.idMateriel).then(async response => {
       const responseData =response.data;
 
       const status = responseData.status;
       const materielid = responseData.idMateriel;
-      console.log(responseData);
-      
-      
       if(status == 0) {
 
   const { value: startdate } = await Swal.fire({
@@ -127,9 +121,6 @@ if (inputElement) {
   }
 });
 if(enddate) {
-  console.log(typeof userId);
-  console.log(typeof materielid.toString());
-
   const params = {
   dateDebut: startdate.toString(), 
   dateFin: enddate.toString(),
@@ -139,9 +130,6 @@ if(enddate) {
   Swal.fire("Vous avez emprunte du " + startdate + " jusqu'au "+ enddate);
 
   ApiService.makereservation('/makeReservation', params).then(response => {
-
-   
-
     const params1 = {
      
 
@@ -150,7 +138,6 @@ if(enddate) {
     
     ApiService.putStatus('/updatestatus/'+item.idMateriel, params1).then(response => {
       getMaterials();
-      console.log(response);
     }).catch(error => {
       console.error(error);
     });
@@ -162,9 +149,6 @@ if(enddate) {
 }
 
       }
-      
-      // I need to check the state of the material
-
     }).catch(error => {
       console.error(error);
     });
@@ -204,7 +188,6 @@ const addMateriel = async () => {
     params.append('ref', formValues[2]);
     
     ApiService.postRessource('/add', params).then(response => {
-      console.log(response);
       getMaterials();
     }).catch(error => {
       console.error(error);
