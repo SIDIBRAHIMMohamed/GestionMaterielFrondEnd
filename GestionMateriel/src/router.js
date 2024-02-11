@@ -1,7 +1,6 @@
 // router.js
 
 import { createRouter, createWebHistory } from 'vue-router';
-import AddMaterial from './components/AddMaterial.vue';
 import Layout from './components/LayOut.vue';
 import Login from './components/LoginPage.vue';
 import Materials from './components/Materials.vue';
@@ -14,7 +13,6 @@ const routes = [
         children: [
             { path: '/admin', component: UserList, meta: { requiresAdmin: true } },
             { path: '/users', component: Materials, meta: { requiresAuth: true } }, // Ajouter meta: { requiresAuth: true }
-            { path: 'ajouter-materiel', component: AddMaterial }
         ]
     },
     { path: '', component: Login },
