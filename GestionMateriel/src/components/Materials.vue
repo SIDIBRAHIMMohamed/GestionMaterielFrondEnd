@@ -165,7 +165,7 @@ const nextPage = () => {
 
 const addMateriel = async () => {
   const { value: formValues } = await Swal.fire({
-    title: 'Ajouter un matériau',
+    title: 'Ajouter un matériel',
     html:
       '<input id="swal-input1" class="swal2-input" placeholder="Nom">' +
       '<input id="swal-input2" class="swal2-input" placeholder="Version">' +
@@ -205,7 +205,6 @@ const prevPage = () => {
 }
 </script>
 <template>
-  <Navbar :userName="nom"  :userPrenom= "prenom"   :userRole = "role" />
   
   <div class="ajouter">
   <button v-on:click="addMateriel" class="btn btn-primary" v-if="role === '1'">Ajouter</button>

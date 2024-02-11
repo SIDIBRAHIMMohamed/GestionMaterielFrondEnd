@@ -1,7 +1,7 @@
 <template>
   <div class="ajouter">
-      <button @click="showAddUserDialog = true" class="btn btn-add">Ajouter un utilisateur</button>
-    </div>
+    <button @click="showAddUserDialog = true" class="btn btn-add">Ajouter un utilisateur</button>
+  </div>
   <div class="user-page"> 
     <div class="user-lists">
       <table class="table">
@@ -23,50 +23,57 @@
             <td>
               <button @click="showUserDetails(user)" class="btn btn-details">Détails</button>
               <button @click="editUser(user)" class="btn btn-modify">Modifier</button>
-              <button @click="deleteUser(user.id)" class="btn btn-delete">Supprimer</button>
               <button @click="resetPassword(user.email)" class="btn btn-reset">Réinitialiser</button>
+              <button @click="confirmDeleteUser(user.id)" class="btn btn-delete">Supprimer</button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    
-
     <div v-if="showAddUserDialog" class="dialog">
-      <div class="dialog-content">
+    <div class="dialog-content">
         <h3 v-if="editMode">Modifier un utilisateur</h3>
         <h3 v-else>Ajouter un utilisateur</h3>
         <form @submit.prevent="editMode ? updateUser() : addUser()" class="form">
-          <div>
-            <label>Nom:</label>
-            <input type="text" v-model="newUser.nom" required>
-          </div>
-          <div>
-            <label>Prénom:</label>
-            <input type="text" v-model="newUser.prenom" required>
-          </div>
-          <div>
-            <label>Email:</label>
-            <input type="email" v-model="newUser.email" required>
-          </div>
-          <div v-if="!editMode">
-            <label>Mot de passe:</label>
-            <input type="password" v-model="newUser.password" required>
-          </div>
-          <div>
-            <label>Rôle:</label>
-            <select v-model="newUser.role" required>
-              <option value="0">Utilisateur</option>
-              <option value="1">Administrateur</option>
-            </select>
-          </div>
+            <div>
+                <label>Nom:</label>
+                <input type="text" v-if="editMode" v-model="editedUser.nom" required>
+                <input type="text" v-else v-model="newUser.nom" required>
+            </div>
+            <div>
+                <label>Prénom:</label>
+                <input type="text" v-if="editMode" v-model="editedUser.prenom" required>
+                <input type="text" v-else v-model="newUser.prenom" required>
+            </div>
+            <div>
+                <label>Email:</label>
+                <input type="email" v-if="editMode" v-model="editedUser.email" required>
+                <input type="email" v-else v-model="newUser.email" required>
+            </div>
+            <div>
+                <label>Mot de passe:</label>
+                <input type="password" v-if="editMode" v-model="editedUser.password" required>
+                <input type="password" v-else v-model="newUser.password" required>
+            </div>
+            <div>
+                <label>Rôle:</label>
+                <select v-if="editMode" v-model="editedUser.role" required>
+                  <option value="0">Utilisateur</option>
+                  <option value="1">Administrateur</option>
+                </select>
+                <select v-else v-model="newUser.role" required>
+                  <option value="0">Utilisateur</option>
+                  <option value="1">Administrateur</option>
+                </select>
+            </div>
 
-          <button type="submit">{{ editMode ? 'Modifier' : 'Ajouter' }}</button>
-          <button @click="closeDialog">{{ editMode ? 'Annuler' : 'Fermer' }}</button>
+
+            <button type="submit">{{ editMode ? 'Modifier' : 'Ajouter' }}</button>
+            <button @click="closeDialog">{{ editMode ? 'Annuler' : 'Fermer' }}</button>
         </form>
-      </div>
     </div>
+</div>
 
     <div v-if="showUserDetailsDialog" class="dialog">
       <div class="dialog-content">
@@ -80,13 +87,24 @@
       </div>
     </div>
 
-    <div class="pagination">
-  <button @click="loadPreviousPage" :disabled="currentPage === 1" class="btn btn-pagination">Page précédente</button>
-  <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-  <button @click="loadNextPage" :disabled="currentPage === totalPages" class="btn btn-pagination">Page suivante</button>
+    <!-- Fenêtre modale de confirmation de suppression -->
+    <div v-if="showDeleteConfirmation" class="modal">
+  <div class="modal-content">
+    <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
+    <button @click="deleteUserConfirmed" class="confirm-button">Confirmer</button>
+    <button @click="showDeleteConfirmation = false" class="cancel-button">Annuler</button>
+  </div>
 </div>
+
+    <div class="pagination">
+      <button @click="loadPreviousPage" :disabled="currentPage === 1" class="btn btn-pagination">Page précédente</button>
+      <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+      <button @click="loadNextPage" :disabled="currentPage === totalPages" class="btn btn-pagination">Page suivante</button>
+    </div>
+    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
   </div>
 </template>
+
 
 <script>
 import UserService from '@/services/UserService';
@@ -99,6 +117,7 @@ export default {
       totalPages: 0,
       showAddUserDialog: false,
       showUserDetailsDialog: false,
+      showDeleteConfirmation: false,
       newUser: {
         nom: '',
         prenom: '',
@@ -120,7 +139,8 @@ export default {
         email: '',
         password: '',
         role: 0
-      }
+      },
+      errorMessage: '' // Ajout de la variable pour stocker le message d'erreur
     };
   },
   mounted() {
@@ -167,6 +187,7 @@ export default {
     editUser(user) {
       this.editMode = true;
       this.editedUser = { ...user };
+      this.editedUser.password = user.password;
       this.showAddUserDialog = true;
     },
     deleteUser(userId) {
@@ -186,6 +207,7 @@ export default {
         })
         .catch(error => {
           console.error('Error updating user:', error);
+          this.errorMessage = 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.';
         });
     },
     resetPassword(email) {
@@ -216,6 +238,21 @@ export default {
         role: 0
       };
     },
+    confirmDeleteUser(userId) {
+      this.userIdToDelete = userId; // Sauvegarde de l'ID de l'utilisateur à supprimer
+      this.showDeleteConfirmation = true; // Affichage de la fenêtre modale de confirmation
+    },
+    deleteUserConfirmed() {
+      UserService.deleteUser(this.userIdToDelete)
+        .then(() => {
+          this.loadUsers();
+          this.showDeleteConfirmation = false; // Cacher la fenêtre modale après suppression
+        })
+        .catch(error => {
+          console.error('Error deleting user:', error);
+          this.showDeleteConfirmation = false; // Cacher la fenêtre modale en cas d'erreur
+        });
+    },
     closeUserDetailsDialog() {
       this.userDetails = {
         nom: '',
@@ -230,8 +267,57 @@ export default {
 };
 </script>
 
-
 <style scoped>
+
+.modal {
+  position: fixed;
+  top: 300px;
+  left: 350px;
+  width: 31%;
+  height: 25%;
+  background-color: rgba(0, 0, 0, 0.2); /* Opacité réduite pour la transparence */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content p {
+  margin-bottom: 10px;
+}
+
+.modal-content button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.modal-content button:last-child {
+  margin-right: 0;
+}
+
+.confirm-button {
+  background-color: #007bff; /* Bleu */
+  color: white;
+}
+
+.cancel-button {
+  background-color: #dc3545; /* Rouge */
+  color: white;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
 .pagination {
   display: flex;
   justify-content: flex-end; /* Align items to the right */
