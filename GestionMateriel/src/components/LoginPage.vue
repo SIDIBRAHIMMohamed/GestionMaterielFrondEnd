@@ -7,15 +7,28 @@
           <label>Email</label>
           <input type="text" class="form-control" v-model="email" placeholder="Entrez votre email">
         </div>
+
+        
+
         <div class="form-group">
           <label>Password</label>
           <input type="password" class="form-control" v-model="password" placeholder="Entrez votre mot de passe">
+        </div>
+
+        <!-- Affichage du message d'erreur -->
+        <div v-if="errorMessage" class="alert alert-danger" role="alert">
+          {{ errorMessage }}
         </div>
 
         <div class="form-group">
           <button type="submit" class="btn btn-primary">Login</button>
         </div>
       </form>
+    </div>
+
+    <!-- Affichage de l'état de chargement -->
+    <div v-if="loading" class="loading-overlay">
+      <div class="loading-spinner"></div>
     </div>
   </div>
 </template>
@@ -28,12 +41,13 @@ export default {
     return {
       email: '',
       password: '',
-      loading: false
+      loading: false,
+      errorMessage: '' // Ajout de la variable errorMessage pour afficher les erreurs
     };
   },
   methods: {
     login() {
-      this.loading = true; // Ajout pour indiquer que la connexion est en cours
+      this.loading = true; // Indiquer que la connexion est en cours
       UserService.login({ email: this.email, password: this.password })
         .then(response => {
           console.log('Connexion réussie:', response.data);
@@ -53,8 +67,10 @@ export default {
           if (error.response) {
             console.error('Status:', error.response.status);
             console.error('Data:', error.response.data);
+            this.errorMessage = error.response.data; // Afficher le message d'erreur provenant de la réponse
+          } else {
+            this.errorMessage = "Email ou mot de passe incorrecte"; // Message d'erreur générique
           }
-          this.$message.error('Échec de la connexion. Veuillez réessayer.');
         })
         .finally(() => {
           this.loading = false; // Réinitialiser l'état de chargement après la connexion

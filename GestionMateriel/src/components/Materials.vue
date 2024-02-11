@@ -13,6 +13,8 @@ app.use(VueSweetalert2);
 const items = ref<any[]>([]);
   const role = localStorage.getItem('userRole');
   const userId = localStorage.getItem('UserId') as string;
+  const nom = localStorage.getItem('Username') as string;
+  const prenom = localStorage.getItem('Userprenom') as string;
   const next = ref(false);
 
 const currentPage = ref(1);
@@ -220,6 +222,8 @@ const prevPage = () => {
 }
 </script>
 <template>
+  <Navbar :userName="nom"  :userPrenom= "prenom"   :userRole = "role" />
+  
   <div class="ajouter">
   <button v-on:click="addMateriel" class="btn btn-primary" v-if="role === '1'">Ajouter</button>
 
@@ -248,7 +252,7 @@ const prevPage = () => {
             <td>
             <button @click="updateItem(item)" class="btn btn-primary" v-if="role === '1'">Modifier</button>
             <button @click="deleteItem(item)" class="btn btn-danger" v-if="role === '1'">Supprimer</button>
-            <button @click="borrowItem(item)" class="btn btn-success">Borrow</button>
+            <button @click="borrowItem(item)" class="btn btn-success">Emprunter</button>
           </td>
           </tr>
         </tbody>

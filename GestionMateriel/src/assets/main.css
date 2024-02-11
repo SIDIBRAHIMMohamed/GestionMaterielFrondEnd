@@ -33,3 +33,9 @@ a,
     padding: 0 2rem;
   }
 }
+
+@font-face{
+  font-family : 'ProtestRevolution';
+  src : url('~@/assets/ProtestRevolution-Regular.ttf')
+  format('truetype');
+}
