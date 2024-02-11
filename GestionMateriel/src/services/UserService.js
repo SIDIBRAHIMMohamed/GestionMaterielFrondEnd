@@ -21,7 +21,10 @@ export default {
   },
   login(loginRequest) {
     return axios.post(`${API_URL2}/login`,loginRequest);
-  }
+  },
+  getAllUsersPagination(page, size) {
+    return axios.get(`${API_URL2}/paginatedUsers?page=${page}&size=${size}`);
+  },
   
   
 };
